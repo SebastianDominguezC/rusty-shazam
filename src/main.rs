@@ -54,11 +54,11 @@ fn main() {
         .unwrap();
 
     let time = 50;
-    let divisions = 200;
+    let divisions = 10;
 
     stream.play().unwrap();
 
-    let mut data = vec![];
+    let mut spectrum = vec![];
     for _ in 0..divisions {
         let mut sd = vec![];
         for data in song_data.lock().unwrap().iter() {
@@ -73,9 +73,11 @@ fn main() {
             nd.push(data.norm());
         }
         song_data.lock().unwrap().clear();
+        spectrum.push(nd);
         std::thread::sleep_ms(time);
     }
-    println!("{}", data.len());
+    println!("{}", spectrum.len());
+    println!("{:#?}", spectrum);
 
     stream.pause().unwrap();
 }
