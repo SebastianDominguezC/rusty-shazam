@@ -1,15 +1,14 @@
-use crate::fingerprint::id::convert_to_fingerprint;
+use crate::fingerprint::id::get_fingerprints;
 use crate::fingerprint::recorder::Recorder;
-use crate::fingerprint::transformation::build_spectrum;
 use iced::{button, Button, Column, Element, Sandbox, Settings, Text};
 
 pub fn main() -> iced::Result {
-    Counter::run(Settings::default())
+    RustyShazam::run(Settings::default())
 }
 
 #[derive(Default)]
-struct Counter {
-    value: i32,
+struct RustyShazam {
+    text: String,
     increment_button: button::State,
     decrement_button: button::State,
     recorder: Recorder,
@@ -21,7 +20,7 @@ enum Message {
     DecrementPressed,
 }
 
-impl Sandbox for Counter {
+impl Sandbox for RustyShazam {
     type Message = Message;
 
     fn new() -> Self {
@@ -29,30 +28,25 @@ impl Sandbox for Counter {
     }
 
     fn title(&self) -> String {
-        String::from("Counter - Iced")
+        String::from("Rusty Shazam")
     }
 
     fn update(&mut self, message: Message) {
         match message {
             Message::IncrementPressed => {
-                self.value += 1;
+                self.text = "Recording".to_string();
                 self.recorder.start_recording();
             }
             Message::DecrementPressed => {
-                self.value -= 1;
                 self.recorder.stop_recording();
-                let spectrum = build_spectrum(2205, self.recorder.flush());
-                match spectrum {
-                    Some(s) => match convert_to_fingerprint(s) {
-                        Some(fingerprints) => {
-                            println!("{:#?}", fingerprints);
-                        }
-                        None => {
-                            println!("No fingerprint can be made from this audio")
-                        }
-                    },
+                self.text = "Not recording".to_string();
+                let fingerprints = get_fingerprints(2205, self.recorder.flush());
+                match fingerprints {
+                    Some(fs) => {
+                        println!("{:#?}", fs);
+                    }
                     None => {
-                        println!("No fingerprint can be made from this audio")
+                        println!("No fingerprints can be made...");
                     }
                 }
             }
@@ -66,7 +60,7 @@ impl Sandbox for Counter {
                 Button::new(&mut self.increment_button, Text::new("Start recording"))
                     .on_press(Message::IncrementPressed),
             )
-            .push(Text::new(self.value.to_string()).size(50))
+            .push(Text::new(&self.text).size(50))
             .push(
                 Button::new(&mut self.decrement_button, Text::new("Stop recording"))
                     .on_press(Message::DecrementPressed),

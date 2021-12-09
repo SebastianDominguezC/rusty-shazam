@@ -1,4 +1,18 @@
-pub fn convert_to_fingerprint(spectrum: Vec<Vec<f32>>) -> Option<Vec<String>> {
+use crate::fingerprint::transformation::build_spectrum;
+
+pub fn get_fingerprints(divs: i32, spectrum: Vec<f32>) -> Option<Vec<String>> {
+    let spectrum = build_spectrum(divs, spectrum);
+    if let Some(s) = spectrum {
+        let fingerprints = convert_to_fingerprints(s);
+
+        if let Some(fs) = fingerprints {
+            return Some(fs);
+        }
+    }
+    None
+}
+
+fn convert_to_fingerprints(spectrum: Vec<Vec<f32>>) -> Option<Vec<String>> {
     let mut fingerprints = vec![];
     for mag in spectrum.iter() {
         if mag.len() < 2205 {
