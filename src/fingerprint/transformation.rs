@@ -37,7 +37,5 @@ pub fn build_spectrum(divisions: i32, mut data: Vec<f32>) -> Option<Vec<Vec<f32>
         spectrum.push(mag);
         i = j;
     }
-    println!("{}", spectrum.len());
-    println!("{}", spectrum[0].len());
     Some(spectrum)
 }

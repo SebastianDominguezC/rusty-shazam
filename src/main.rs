@@ -1,6 +1,8 @@
+#![feature(async_closure)]
+
 mod app;
 mod fingerprint;
-
-fn main() {
+#[tokio::main]
+async fn main() {
     app::main();
 }

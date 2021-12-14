@@ -1,6 +1,27 @@
 use crate::fingerprint::transformation::build_spectrum;
 
-pub fn get_fingerprints(divs: i32, spectrum: Vec<f32>) -> Option<Vec<String>> {
+#[derive(Debug, Clone)]
+pub struct Fingerprint {
+    pub id2: i32,
+    pub id1: i32,
+    pub id3: i32,
+    pub id4: i32,
+    pub id5: i32,
+}
+
+impl Fingerprint {
+    pub fn new(id1: i32, id2: i32, id3: i32, id4: i32, id5: i32) -> Self {
+        Self {
+            id1,
+            id2,
+            id3,
+            id4,
+            id5,
+        }
+    }
+}
+
+pub fn get_fingerprints(divs: i32, spectrum: Vec<f32>) -> Option<Vec<Fingerprint>> {
     let spectrum = build_spectrum(divs, spectrum);
     if let Some(s) = spectrum {
         let fingerprints = convert_to_fingerprints(s);
@@ -12,7 +33,7 @@ pub fn get_fingerprints(divs: i32, spectrum: Vec<f32>) -> Option<Vec<String>> {
     None
 }
 
-fn convert_to_fingerprints(spectrum: Vec<Vec<f32>>) -> Option<Vec<String>> {
+fn convert_to_fingerprints(spectrum: Vec<Vec<f32>>) -> Option<Vec<Fingerprint>> {
     let mut fingerprints = vec![];
     for mag in spectrum.iter() {
         if mag.len() < 2205 {
@@ -30,7 +51,7 @@ fn convert_to_fingerprints(spectrum: Vec<Vec<f32>>) -> Option<Vec<String>> {
         let r180 = get_highest_freq(r180);
         let r300 = get_highest_freq(r300);
 
-        let fingerprint = format!("{:X} {:X} {:X} {:X} {:X}", r40, r80, r120, r180, r300);
+        let fingerprint = Fingerprint::new(r40, r80, r120, r180, r300);
         fingerprints.push(fingerprint);
     }
     Some(fingerprints)
