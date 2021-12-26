@@ -1,16 +1,10 @@
 use crate::fingerprint::id::get_fingerprints;
 use crate::fingerprint::recorder::Recorder;
 use hyper::{Body, Client, Method, Request};
-use iced::{button, Button, Column, Element, Sandbox, Settings, Text};
+use iced::{button, Button, Column, Element, Row, Sandbox, Settings, Text};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-struct Data {
-    name: String,
-    author: String,
-    duration: String,
-}
 pub fn main() -> iced::Result {
     RustyShazam::run(Settings::default())
 }
@@ -18,22 +12,19 @@ pub fn main() -> iced::Result {
 #[derive(Default)]
 struct RustyShazam {
     text: String,
+    matches: Vec<String>,
     increment_button: button::State,
     decrement_button: button::State,
     recorder: Recorder,
-}
-
-#[derive(Debug, Clone, Copy)]
-enum Message {
-    Play,
-    Stop,
 }
 
 impl Sandbox for RustyShazam {
     type Message = Message;
 
     fn new() -> Self {
-        Self::default()
+        let mut app = Self::default();
+        app.text = "Not recording".to_string();
+        app
     }
 
     fn title(&self) -> String {
@@ -49,10 +40,10 @@ impl Sandbox for RustyShazam {
             Message::Stop => {
                 self.recorder.stop_recording();
                 self.text = "Not recording".to_string();
+                self.matches = vec!["Looking for songs".to_string()];
                 let fingerprints = get_fingerprints(2205, self.recorder.flush());
                 match fingerprints {
                     Some(fs) => {
-                        println!("{:#?}", fs);
                         let mut results = vec![];
                         for f in fs.iter() {
                             let json = format!(
@@ -62,7 +53,7 @@ impl Sandbox for RustyShazam {
 
                             let req = Request::builder()
                                 .method(Method::GET)
-                                .uri("http://127.0.0.1:4000/api/v1/fingerprints")
+                                .uri("http://sebs-playground.herokuapp.com/api/v1/fingerprints")
                                 .header("content-type", "application/json")
                                 .body(Body::from(json))
                                 .unwrap();
@@ -70,6 +61,7 @@ impl Sandbox for RustyShazam {
                             let client = Client::new();
                             let res = futures::executor::block_on(client.request(req));
                             if let Ok(res) = res {
+                                println!("Processing");
                                 let res = futures::executor::block_on(hyper::body::to_bytes(
                                     res.into_body(),
                                 ))
@@ -82,32 +74,64 @@ impl Sandbox for RustyShazam {
                                 for data in deserialized.iter() {
                                     results.push(data.clone());
                                 }
+                                println!("Processing 2");
+                            } else if let Err(e) = res {
+                                println!("{}", e);
                             }
                         }
+                        println!("Finished process");
                         let results: Vec<Data> =
                             results.iter().unique().map(|v| v.clone()).collect();
-                        println!("{:?}", results);
+                        self.matches = results
+                            .iter()
+                            .map(|r| {
+                                format!("{} by {}. Duration: {}", r.name, r.author, r.duration)
+                            })
+                            .collect();
                     }
-                    None => {
-                        println!("No fingerprints can be made...");
-                    }
+                    None => self.matches = vec!["No results found".to_string()],
                 }
             }
         }
     }
 
     fn view(&mut self) -> Element<Message> {
+        let songs = self.matches.iter().map(|v| Text::new(v).size(12));
+        let mut list = Column::new();
+        for song in songs {
+            list = list.push(song);
+        }
+
         Column::new()
+            .push(Text::new(&self.text).size(24))
             .padding(20)
             .push(
-                Button::new(&mut self.increment_button, Text::new("Start recording"))
-                    .on_press(Message::Play),
+                Row::new()
+                    .push(
+                        Button::new(&mut self.increment_button, Text::new("Start recording"))
+                            .on_press(Message::Play),
+                    )
+                    .push(
+                        Button::new(&mut self.decrement_button, Text::new("Stop recording"))
+                            .on_press(Message::Stop),
+                    ),
             )
-            .push(Text::new(&self.text).size(50))
-            .push(
-                Button::new(&mut self.decrement_button, Text::new("Stop recording"))
-                    .on_press(Message::Stop),
-            )
+            .padding(20)
+            .push(Text::new("Songs found").size(16))
+            .push(list)
             .into()
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Message {
+    Play,
+    Stop,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+struct Data {
+    name: String,
+    author: String,
+    duration: String,
 }

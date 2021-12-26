@@ -172,7 +172,7 @@ async fn post_data(data: &SongData) {
 
     let req = Request::builder()
         .method(Method::POST)
-        .uri("http://127.0.0.1:4000/api/v1/fingerprints")
+        .uri("https://sebs-playground.herokuapp.com/api/v1/fingerprints")
         .header("content-type", "application/json")
         .body(Body::from(json))
         .unwrap();

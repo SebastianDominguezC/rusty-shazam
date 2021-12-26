@@ -3,7 +3,6 @@ use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
 
 pub struct Recorder {
-    is_recording: bool,
     stream: cpal::Stream,
     data: Arc<Mutex<Vec<f32>>>,
 }
@@ -59,20 +58,17 @@ impl Recorder {
         });
 
         Self {
-            is_recording: false,
             stream,
             data: song_data,
         }
     }
 
     pub fn start_recording(&mut self) {
-        self.is_recording = true;
         self.stream.play().expect("Could not start recording");
     }
 
     pub fn stop_recording(&mut self) {
         self.stream.pause().expect("Could not stop recording");
-        self.is_recording = false;
     }
 
     pub fn flush(&mut self) -> Vec<f32> {
