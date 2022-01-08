@@ -51,7 +51,7 @@ impl Analyzer {
                 // Map into a format
                 let results: Vec<String> = results
                     .iter()
-                    .map(|r| format!("{} by {}. Duration: {}", r.name, r.author, r.duration))
+                    .map(|r| format!("-- {} by {}. Duration: {}", r.name, r.author, r.duration))
                     .collect();
 
                 // Return message for app update

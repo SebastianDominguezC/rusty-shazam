@@ -3,6 +3,7 @@
 mod analyzer;
 mod app;
 mod fingerprint;
+mod style;
 
 #[async_std::main]
 async fn main() {

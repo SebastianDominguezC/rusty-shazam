@@ -1,8 +1,10 @@
 use crate::analyzer::recorder::Recorder;
 use crate::analyzer::Analyzer;
+use crate::style::Theme;
 
 use iced::{
-    button, executor, Application, Button, Clipboard, Column, Command, Element, Row, Settings, Text,
+    button, executor, Application, Button, Clipboard, Column, Command, Container, Element, Length,
+    Row, Settings, Text,
 };
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +19,7 @@ struct RustyShazam {
     increment_button: button::State,
     decrement_button: button::State,
     recorder: Recorder,
+    theme: Theme,
 }
 
 impl Application for RustyShazam {
@@ -27,6 +30,7 @@ impl Application for RustyShazam {
     fn new(_flags: ()) -> (Self, Command<Message>) {
         let mut app = Self::default();
         app.text = "Not recording".to_string();
+        app.theme = Theme::Dark;
         (app, Command::none())
     }
 
@@ -54,29 +58,40 @@ impl Application for RustyShazam {
     }
 
     fn view(&mut self) -> Element<Message> {
-        let songs = self.matches.iter().map(|v| Text::new(v).size(12));
+        let songs = self.matches.iter().map(|v| Text::new(v).size(16));
         let mut list = Column::new();
         for song in songs {
             list = list.push(song);
         }
 
-        Column::new()
-            .push(Text::new(&self.text).size(24))
-            .padding(20)
+        let content = Column::new()
+            .push(Text::new(&self.text).size(28).height(Length::from(32)))
             .push(
                 Row::new()
                     .push(
                         Button::new(&mut self.increment_button, Text::new("Start recording"))
-                            .on_press(Message::Play),
+                            .on_press(Message::Play)
+                            .style(self.theme)
+                            .padding(8),
                     )
                     .push(
                         Button::new(&mut self.decrement_button, Text::new("Stop recording"))
-                            .on_press(Message::Stop),
-                    ),
+                            .on_press(Message::Stop)
+                            .style(self.theme)
+                            .padding(8),
+                    )
+                    .spacing(16),
             )
-            .padding(20)
-            .push(Text::new("Songs found").size(16))
-            .push(list)
+            .spacing(16)
+            .push(Text::new("Songs found:").size(20))
+            .push(list);
+
+        Container::new(content)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .center_x()
+            .center_y()
+            .style(self.theme)
             .into()
     }
 }
