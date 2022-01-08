@@ -1,8 +1,9 @@
-use crate::fingerprint::id::get_fingerprints;
-use crate::fingerprint::recorder::Recorder;
-use hyper::{Body, Client, Method, Request};
-use iced::{button, Button, Column, Element, Row, Sandbox, Settings, Text};
-use itertools::Itertools;
+use crate::analyzer::recorder::Recorder;
+use crate::analyzer::Analyzer;
+
+use iced::{
+    button, executor, Application, Button, Clipboard, Column, Command, Element, Row, Settings, Text,
+};
 use serde::{Deserialize, Serialize};
 
 pub fn main() -> iced::Result {
@@ -18,20 +19,22 @@ struct RustyShazam {
     recorder: Recorder,
 }
 
-impl Sandbox for RustyShazam {
+impl Application for RustyShazam {
+    type Executor = executor::Default;
     type Message = Message;
+    type Flags = ();
 
-    fn new() -> Self {
+    fn new(_flags: ()) -> (Self, Command<Message>) {
         let mut app = Self::default();
         app.text = "Not recording".to_string();
-        app
+        (app, Command::none())
     }
 
     fn title(&self) -> String {
         String::from("Rusty Shazam")
     }
 
-    fn update(&mut self, message: Message) {
+    fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {
         match message {
             Message::Play => {
                 self.text = "Recording".to_string();
@@ -41,58 +44,13 @@ impl Sandbox for RustyShazam {
                 self.recorder.stop_recording();
                 self.text = "Not recording".to_string();
                 self.matches = vec!["Looking for songs".to_string()];
-                let fingerprints = get_fingerprints(2205, self.recorder.flush());
-                match fingerprints {
-                    Some(fs) => {
-                        let mut results = vec![];
-                        for f in fs.iter() {
-                            let json = format!(
-                                "{{\"id1\": {}, \"id2\": {},\"id3\": {}, \"id4\": {}, \"id5\": {}}}",
-                                f.id1, f.id2, f.id3, f.id4, f.id5,
-                            );
-
-                            let req = Request::builder()
-                                .method(Method::GET)
-                                .uri("http://sebs-playground.herokuapp.com/api/v1/fingerprints")
-                                .header("content-type", "application/json")
-                                .body(Body::from(json))
-                                .unwrap();
-
-                            let client = Client::new();
-                            let res = futures::executor::block_on(client.request(req));
-                            if let Ok(res) = res {
-                                println!("Processing");
-                                let res = futures::executor::block_on(hyper::body::to_bytes(
-                                    res.into_body(),
-                                ))
-                                .unwrap();
-                                let d = std::str::from_utf8(&res.to_vec()[..]).unwrap().to_string();
-                                let start = d.find("[").unwrap();
-                                let end = d.find("]").unwrap();
-                                let ex = &d[start..end + 1];
-                                let deserialized: Vec<Data> = serde_json::from_str(ex).unwrap();
-                                for data in deserialized.iter() {
-                                    results.push(data.clone());
-                                }
-                                println!("Processing 2");
-                            } else if let Err(e) = res {
-                                println!("{}", e);
-                            }
-                        }
-                        println!("Finished process");
-                        let results: Vec<Data> =
-                            results.iter().unique().map(|v| v.clone()).collect();
-                        self.matches = results
-                            .iter()
-                            .map(|r| {
-                                format!("{} by {}. Duration: {}", r.name, r.author, r.duration)
-                            })
-                            .collect();
-                    }
-                    None => self.matches = vec!["No results found".to_string()],
-                }
+                return Command::from(Analyzer::analyze(self.recorder.flush()));
+            }
+            Message::Analyze(data) => {
+                self.matches = data;
             }
         }
+        Command::none()
     }
 
     fn view(&mut self) -> Element<Message> {
@@ -123,10 +81,11 @@ impl Sandbox for RustyShazam {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-enum Message {
+#[derive(Debug, Clone)]
+pub enum Message {
     Play,
     Stop,
+    Analyze(Vec<String>),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]

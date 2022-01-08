@@ -1,17 +1,18 @@
 # Rusty-Shazam
 
-Rusty Shazam is a shazam-like app built with Rust.
+Rusty-Shazam is a shazam-like app built with Rust.
 
 It has a custom fingerprinting algorithm that uses the Fast Fourier Transform.
 
 You can record and stop the recording. Once the recording stops, it tries to hash the recording and look for any matching fingerprints.
 
-Some concepts used for the proyect:
+Some concepts used for the project:
 
 - Fast Fourier Transform
 - Recording
-- Data processing in rust
+- Data processing in Rust
 - Futures in Rust
+- Asynchronous data processing
 - REST server
 - MongoDB Database
 
@@ -28,7 +29,7 @@ cargo run
 - iced - for GUI
 - cpal - recording
 - rustfft - FFT
-- hyper, tokio, futures - for all async and server requests
+- surf, async-std - for all async and server requests
 
 ## Server
 
