@@ -9,12 +9,35 @@ You can record and stop the recording. Once the recording stops, it tries to has
 Some concepts used for the project:
 
 - Fast Fourier Transform
-- Recording
+- Audio Recording
 - Data processing in Rust
 - Futures in Rust
 - Asynchronous data processing
 - REST server
 - MongoDB Database
+- GUI in Rust
+
+## Songs
+
+Songs were taken from [this free dataset](https://www.kaggle.com/imsparsh/fma-free-music-archive-small-medium).
+
+The small 8GB data set was used, with around 8_000 song samples of 30 seconds each.
+
+Data was analyzed to an output of around 202_000 unique hashes for moments in each song.
+
+Some songs could not be propperly analyzed, resulting in around only 7_000 songs in the fingerprint database.
+
+## Future Improvements
+
+### Server Side
+
+- Removing silences from beggining and ending of songs
+- Giving a propper error range for each ID in a fingerprint
+
+### Client Side
+
+- Probability weighing algorithm for all results returned
+- Better filtering and limiting of results
 
 ## Get started
 
@@ -34,11 +57,3 @@ cargo run
 ## Server
 
 The songs can be accesses through my custom server, which connects to the DB that contains all fingerprints (around 900 fingerprints of 30 song samples)
-
-## Songs
-
-Songs were taken from [this free dataset](https://www.kaggle.com/imsparsh/fma-free-music-archive-small-medium).
-
-The small dataset was used 8GB.
-
-Around 8000, 30 second song samples, giving a total of around 202_082 unique hashes for moments in each song .
