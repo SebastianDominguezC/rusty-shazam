@@ -20,7 +20,6 @@ impl Analyzer {
 
                 // Loop every fingerprint
                 for f in fs.iter() {
-                    println!("Finding fingerprint");
                     // Build ID and request
                     let ids = Id::new(f.id1, f.id2, f.id3, f.id4, f.id5);
                     let uri = "http://sebs-playground.herokuapp.com/api/v1/fingerprints";
@@ -49,16 +48,23 @@ impl Analyzer {
                 let results: Vec<Song> = results.iter().unique().map(|v| v.clone()).collect();
 
                 // Map into a format
-                let results: Vec<String> = results
+                let mut results: Vec<String> = results
                     .iter()
                     .map(|r| format!("-- {} by {}. Duration: {}", r.name, r.author, r.duration))
                     .collect();
 
                 // Return message for app update
+                if results.len() == 0 {
+                    return Message::Analyze(vec!["No songs found".to_string()]);
+                }
+                if results.len() > 10 {
+                    results = results[0..10].to_vec();
+                    println!("{:?}", results);
+                }
                 return Message::Analyze(results);
             }
             None => {
-                return Message::Analyze(vec!["No results found".to_string()]);
+                return Message::Analyze(vec!["No songs found".to_string()]);
             }
         }
     }
