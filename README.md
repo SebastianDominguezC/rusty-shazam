@@ -72,4 +72,4 @@ cargo run --release
 
 ## Server
 
-The songs can be accesses through my custom server, which connects to the DB that contains all fingerprints (around 900 fingerprints of 30 song samples)
+The songs can be accesses through my custom server, which connects to the DB that contains all fingerprints (around 202_000 fingerprints of 7_000 song samples)
