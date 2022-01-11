@@ -1,5 +1,7 @@
 # Rusty-Shazam
 
+[![Example](./archive/showcase.gif)](./archive/showcase.mp4)
+
 Rusty-Shazam is a shazam-like app built with Rust.
 
 It has a custom fingerprinting algorithm that uses the Fast Fourier Transform.
