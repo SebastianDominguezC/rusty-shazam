@@ -27,6 +27,12 @@ Data was analyzed to an output of around 202_000 unique hashes for moments in ea
 
 Some songs could not be propperly analyzed, resulting in around only 7_000 songs in the fingerprint database.
 
+## Example
+
+You can try out this app by seeing the Get Started section!
+
+You can also see the video of the app working [here](./archive/showcase.mp4)
+
 ## Future Improvements
 
 ### Server Side
@@ -38,13 +44,23 @@ Some songs could not be propperly analyzed, resulting in around only 7_000 songs
 
 - Probability weighing algorithm for all results returned
 - Better filtering and limiting of results
+- Better UI when recording (animations)
+- Better UI when rendering results
 
 ## Get started
 
-To run the app:
+Download the code and then in the root directory:
+
+Run the app unoptimized:
 
 ```
 cargo run
+```
+
+Run the app with optimizations:
+
+```
+cargo run --release
 ```
 
 ## Dependencies
