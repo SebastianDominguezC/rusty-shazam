@@ -1,6 +1,7 @@
 use crate::fingerprint::transformation::build_spectrum;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Fingerprint {
     pub id2: i32,
     pub id1: i32,
